@@ -63,7 +63,9 @@ def main(args=None):
     parser.add_argument('--slice_rows', type=int, default=4, help='Number of rows of slices')
     parser.add_argument('--slice_cols', type=int, default=5, help='Number of columns of slices')
     parser.add_argument('--slice_axis', type=str, default='z', help='Axis to slice along (x/y/z)')
+    parser.add_argument('--slice_pos', type=int, nargs=3, default=None, help='(x,y,z) coordinates to slice at (for the 3 axis plot)')
     parser.add_argument('--three_axis', help='Make a 3 axis (x,y,z) plot', action='store_true')
+    parser.add_argument('--annotate', help='Annotate plots with slice position and left/right', default=True, action='store_true')
     parser.add_argument('--timeseries', action='store_true', help='Plot the same slice through each volume in a time-series')
     parser.add_argument('--volume', type=int, default=0, help='Plot one volume from a timeseries')
     parser.add_argument('--slice_lims', type=float, nargs=2, default=(0.1, 0.9),
@@ -95,9 +97,12 @@ def main(args=None):
     if args.three_axis:
         args.slice_rows = 1
         args.slice_cols = 3
-        args.slice_axis = ['x', 'y', 'z']
+        args.slice_axis = [0, 1, 2]
         slice_total = 3
-        slice_pos = (bbox.center[0], bbox.center[1], bbox.center[2])
+        if args.slice_pos is None:
+            slice_pos = (bbox.center[0], bbox.center[1], bbox.center[2])
+        else:
+            slice_pos = args.slice_pos
     elif args.timeseries:
         slice_pos = bbox.center[args.slice_axis]
         slice_total = layers[0].image.shape[3]
@@ -133,6 +138,19 @@ def main(args=None):
         slcr = Slicer(bbox, sp, axis, args.samples, orient=args.orient)
         sl_final = blend_layers(layers, slcr)
         ax.imshow(sl_final, origin=origin, extent=slcr.extent, interpolation=args.interp)
+        if args.annotate:
+            ax.set_title('{:s} = {:.0f}'.format(['x','y','z'][axis], sp), color="white", pad=-15)
+            if (axis>0):
+                # in coronal and axial slices, annotate L/R
+                top = 0.75*np.delete(bbox.end,axis)[1]
+                ax.text(0.7*np.delete(bbox.start,axis)[0], top, 'L',
+                        horizontalalignment='left',
+                        verticalalignment='top',
+                        color='white')
+                ax.text(0.7*np.delete(bbox.end,axis)[0], top, 'R',
+                        horizontalalignment='right',
+                        verticalalignment='top',
+                        color='white')
         ax.axis('off')
         if args.contour:
             sl_contour = layers[1].get_alpha(slcr)
