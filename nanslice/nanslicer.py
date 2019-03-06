@@ -171,7 +171,8 @@ def main(args=None):
         gs1.update(left=0.01, right=0.99, bottom=0.01, top=0.99, wspace=0.01, hspace=0.01)
     print('*** Saving')
     print('Writing file: ', args.output, 'at', args.dpi, ' DPI')
-    f.savefig(args.output, facecolor=f.get_facecolor(), edgecolor='none', dpi=args.dpi)
+    f.savefig(args.output, facecolor=f.get_facecolor(), edgecolor='none',
+              bbox_inches='tight', dpi=args.dpi)
     plt.close(f)
 
 if __name__ == "__main__":

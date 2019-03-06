@@ -15,7 +15,7 @@ def colorbar(axes, cm_name, clims, clabel,
              black_backg=True, show_ticks=True, tick_fmt='{:.2g}', orient='h'):
     """
     Plots a colorbar in the specified axes
-    
+
     Parameters:
 
     - axes -- matplotlib axes instance to use for plotting
@@ -73,7 +73,7 @@ def alphabar(axes, cm_name, clims, clabel,
              black_backg=True, orient='h'):
     """
     Plots a 2D 'alphabar' with color and transparency axes in the specified matplotlib axes object
-    
+
     Parameters:
 
     - axes -- matplotlib axes instance to use for plotting
@@ -92,7 +92,7 @@ def alphabar(axes, cm_name, clims, clabel,
     """
     steps = 32
     if orient == 'h':
-        ext = (alims[0], alims[1], clims[0], clims[1])
+        ext = (clims[0], clims[1], alims[0], alims[1])
         cdata = np.tile(np.linspace(clims[0], clims[1], steps)[np.newaxis, :], [steps, 1])
         alpha = np.tile(np.linspace(0, 1, steps)[:, np.newaxis], [1, steps])
     else:
@@ -100,7 +100,7 @@ def alphabar(axes, cm_name, clims, clabel,
         cdata = np.tile(np.linspace(clims[0], clims[1], steps)[:, np.newaxis], [1, steps])
         alpha = np.tile(np.linspace(0, 1, steps)[np.newaxis, :], [steps, 1])
     color = slice_func.colorize(cdata, cm_name, clims)
-    
+
     backg = np.ones((steps, steps, 3))
     acmap = slice_func.blend(backg, color, alpha)
     axes.imshow(acmap, origin='lower', interpolation='hanning', extent=ext, aspect='auto')
@@ -120,14 +120,14 @@ def alphabar(axes, cm_name, clims, clabel,
         axes.set_xticklabels(alabels)
         axes.set_yticks(cticks)
         axes.set_yticklabels(clabels, rotation='vertical', va='center')
-    
+
     if alines:
         for pos, color, style in zip(alines, alines_colors, alines_styles):
             if orient == 'h':
                 axes.axhline(y=pos, linewidth=1.5, linestyle=style, color=color)
             else:
                 axes.axvline(x=pos, linewidth=1.5, linestyle=style, color=color)
-    
+
     if black_backg:
         axes.spines['bottom'].set_color('w')
         axes.spines['top'].set_color('w')
