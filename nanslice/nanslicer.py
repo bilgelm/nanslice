@@ -41,6 +41,7 @@ Hanning sampling in the ``matplotlib`` step.
 """
 import argparse
 import numpy as np
+from nibabel import load as nibload
 import matplotlib.pyplot as plt
 import matplotlib.gridspec as gridspec
 from .util import add_common_arguments
@@ -139,22 +140,32 @@ def main(args=None):
         sl_final = blend_layers(layers, slcr)
         ax.imshow(sl_final, origin=origin, extent=slcr.extent, interpolation=args.interp)
         if args.annotate:
-            ax.set_title('{:s} = {:.0f}'.format(['x','y','z'][axis], sp), color="white", pad=-15)
+            ax.set_title('{:s} = {:.0f}'.format(['x','y','z'][axis], sp),
+                         fontsize=15, color="white", pad=-10)
             if (axis>0):
                 # in coronal and axial slices, annotate L/R
                 top = 0.75*np.delete(bbox.end,axis)[1]
                 ax.text(0.7*np.delete(bbox.start,axis)[0], top, 'L',
+                        fontsize=15,
                         horizontalalignment='left',
                         verticalalignment='top',
                         color='white')
                 ax.text(0.7*np.delete(bbox.end,axis)[0], top, 'R',
+                        fontsize=15,
                         horizontalalignment='right',
                         verticalalignment='top',
                         color='white')
         ax.axis('off')
         if args.contour:
-            sl_contour = layers[1].get_alpha(slcr)
-            contour_levels = scale_clip(np.array(args.contour), args.overlay_alpha_lim)
+            if args.overlay_contour:
+                # assume that overlay_contour image is in the same scale as the alpha overlay
+                contour_image = nibload(args.overlay_contour)
+                contour_slice = slcr.sample(contour_image, layers[1].interp_order, layers[1].alpha_scale)
+                sl_contour = scale_clip(contour_slice, layers[1].alpha_lim)
+            else:
+                sl_contour = layers[1].get_alpha(slcr)
+            #contour_levels = scale_clip(np.array(args.contour), args.overlay_alpha_lim)
+            contour_levels = scale_clip(np.array(args.contour), layers[1].alpha_lim)
 
             # Contour levels must be within the range of overlay alpha values.
             # Ignore contour levels that are not within this range to prevent
@@ -167,9 +178,9 @@ def main(args=None):
     if args.base_label or args.overlay_label:
         print('*** Adding colorbar')
         if args.bar_pos == 'bottom':
-            gs1.update(left=0.01, right=0.99, bottom=0.16, top=0.99, wspace=0.01, hspace=0.01)
+            gs1.update(left=0.01, right=0.99, bottom=0.20, top=0.99, wspace=0.01, hspace=0.01)
             gs2 = gridspec.GridSpec(1, 1)
-            gs2.update(left=0.08, right=0.92, bottom=0.08, top=0.15, wspace=0.1, hspace=0.1)
+            gs2.update(left=0.08, right=0.92, bottom=0.08, top=0.19, wspace=0.1, hspace=0.1)
             orient='h'
         else:
             gs1.update(left=0.01, right=0.95, bottom=0.01, top=0.99, wspace=0.01, hspace=0.01)
@@ -179,7 +190,7 @@ def main(args=None):
         axes = plt.subplot(gs2[0], facecolor='black')
         if args.overlay_alpha:
             alphabar(axes, args.overlay_map, args.overlay_lim, args.overlay_label,
-                        args.overlay_alpha_lim, args.overlay_alpha_label, orient=orient)
+                     args.overlay_alpha_lim, args.overlay_alpha_label, orient=orient)
         else:
             if args.base_map:
                 colorbar(axes, layers[0].cmap, layers[0].clim, args.base_label, orient=orient)

@@ -112,14 +112,16 @@ def alphabar(axes, cm_name, clims, clabel,
 
     if orient == 'h':
         axes.set_xticks(cticks)
-        axes.set_xticklabels(clabels)
+        axes.set_xticklabels(clabels, fontsize=15)
         axes.set_yticks(aticks)
-        axes.set_yticklabels(alabels, rotation='vertical')
+        axes.set_yticklabels(alabels, rotation='vertical', va='center',
+                             fontsize=12)
     else:
         axes.set_xticks(aticks)
-        axes.set_xticklabels(alabels)
+        axes.set_xticklabels(alabels, fontsize=12)
         axes.set_yticks(cticks)
-        axes.set_yticklabels(clabels, rotation='vertical', va='center')
+        axes.set_yticklabels(clabels, rotation='vertical', va='center',
+                             fontsize=15)
 
     if alines:
         for pos, color, style in zip(alines, alines_colors, alines_styles):

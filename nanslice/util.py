@@ -65,6 +65,8 @@ def add_common_arguments(parser):
                         help='Scaling factor for the alpha image')
     parser.add_argument('--overlay_alpha_label', type=str, default='1-p',
                         help='Label for overlay alpha/transparency axis')
+    parser.add_argument('--overlay_contour', type=str,
+                        help='Image for contour drawing')
     parser.add_argument('--contour', type=float, action='append',
                         help='Add alpha image contours (can be multiple)')
     parser.add_argument('--contour_color', type=str, action='append', default='k',
